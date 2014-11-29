@@ -22,6 +22,6 @@ app.get('/PiTube/player/Killall', function(req, res){
 	res.setHeader('Content-type', 'text/plain');
 	res.end('Killed all mplayer processes');
 	exec(['killall', 'mplayer']);
-})
+});
 
 app.listen(port);
