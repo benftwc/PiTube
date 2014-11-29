@@ -1,5 +1,5 @@
 var express = require('express'),
-	http = require('http');
+	http = require('http'),
 	port = 1337,
 	exec = require('exec');
 
