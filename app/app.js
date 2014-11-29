@@ -7,6 +7,8 @@ var app = express();
 var server = http.createServer(app);
 
 app.get('/PiTube/player/:id', function(req, res){
+	var fullUrl = req.protocol + "://" + req.get('host') + req.originalUrl;
+	console.log("GET "+fullUrl)
 	res.setHeader('Content-Type', 'text/plain');
 	res.end('Playing ' + req.params.id + ' on your raspberry Pi');
 	console.log("Now playing "+ req.params.id);
@@ -18,7 +20,9 @@ app.get('/PiTube/player/:id', function(req, res){
 	});
 });
 
-app.get('/PiTube/player/Killall', function(req, res){
+app.get('/PiTube/Killall', function(req, res){
+	var fullUrl = req.protocol + "://" + req.get('host') + req.originalUrl;
+	console.log("GET "+fullUrl)
 	res.setHeader('Content-type', 'text/plain');
 	res.end('Killed all mplayer processes');
 	exec(['killall', 'mplayer']);
