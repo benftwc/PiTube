@@ -25,7 +25,12 @@ app.get('/PiTube/Killall', function(req, res){
 	console.log("GET "+fullUrl)
 	res.setHeader('Content-type', 'text/plain');
 	res.end('Killed all mplayer processes');
-	exec(['killall', 'mplayer']);
+	exec(['killall', 'mplayer'], function(err, out, code) {
+		if(err instanceof Error)
+			throw err;
+		process.stderr.write(err);
+		process.stdout.write(out);
+	});
 });
 
 app.listen(port);
