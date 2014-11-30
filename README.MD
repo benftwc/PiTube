@@ -16,3 +16,4 @@ Casting youtube musics to your **Raspberry pi since 1952**
 ### Endpoints
 > - **http://0.0.0.0:1337/PiTube/player/:music** replace **:music** with an artist, a song name or a video id
 > - **http://0.0.0.0:1337/PiTube/Killall** to kill all mplayer running processes
+> - **http://0.0.0.0:1337/PiTube/clearcache** to clear PiTube's cache

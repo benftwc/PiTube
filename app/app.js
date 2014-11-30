@@ -73,7 +73,7 @@ app.get('/PiTube/clearcache', function(req, res) {
 	});
 	res.setHeader('Content-type', 'text/plain');
 	res.end("Cache cleared");
-})
+});
 
 app.listen(port);
 console.log("App running on port " + port);
