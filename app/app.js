@@ -1,12 +1,29 @@
 var express = require('express'),
 	http = require('http'),
 	port = 1337, 
-	exec = require('exec');
+	exec = require('exec'),
+	fs = require('fs');
 
 var app = express();
 var server = http.createServer(app);
 var playing = 0; // U PLAYIN OR NOT BRUH
 var nowPlaying; // WOT R U PLAYIN M9 
+var musics = getMusics();
+var apiPath = '/PiTube/api/';
+app.set('view engine', 'ejs');
+
+function getMusics(){
+	var musics = fs.readdirSync('./cache/');
+	for(var i=0; i<musics.length; i++){
+		musics[i] = replaceAll(".m4a", "", musics[i]);
+		musics[i] = replaceAll("_", " ", musics[i]);
+	}
+	return musics
+}
+
+function replaceAll(find, replace, str){
+	return str.replace(new RegExp(find, 'g'), replace);
+}
 
 function killMplayer(){
 	console.log("Killing all mplayer processes...");
@@ -23,7 +40,17 @@ function logfullurl(req){
 	console.log("GET "+fullUrl);
 }
 
-app.get('/PiTube/player/:id', function(req, res){
+app.get('/', function(req, res){
+	logfullurl(req);
+	musics = getMusics();
+	res.render('pages/index', {
+		nowPlaying: nowPlaying,
+		musics: musics,
+		apiPath: apiPath
+	});
+})
+
+app.get(apiPath+':id', function(req, res){
 	logfullurl(req);
 	res.setHeader('Content-Type', 'text/plain');
 	res.end('Playing ' + req.params.id + ' on your raspberry Pi');
@@ -42,7 +69,7 @@ app.get('/PiTube/player/:id', function(req, res){
 	nowPlaying = req.params.id;
 });
 
-app.get('/PiTube/Killall', function(req, res){
+app.get('/Killall', function(req, res){
 	logfullurl(req);
 	res.setHeader('Content-type', 'text/plain');
 	if(playing){
@@ -52,7 +79,7 @@ app.get('/PiTube/Killall', function(req, res){
 	}
 });
 
-app.get('/PiTube/Nowplaying', function(req, res) {
+app.get('/Nowplaying', function(req, res) {
 	logfullurl(req);
 	res.setHeader('Content-type', 'text/plain');
 	if(nowPlaying.length > 0 ){
@@ -62,10 +89,10 @@ app.get('/PiTube/Nowplaying', function(req, res) {
 	}
 });
 
-app.get('/PiTube/clearcache', function(req, res) {
+app.get('/clearcache', function(req, res) {
 	logfullurl(req);
 	console.log("Clearing cache...");
-	exec(['rm', '-rf', './cache'], function(err, out, code) {
+	exec(['./clearcache.sh'], function(err, out, code) {
 		if(err instanceof Error)
 			throw err;
 		process.stderr.write(err);
