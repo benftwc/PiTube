@@ -7,10 +7,8 @@ Casting youtube musics to your **Raspberry pi since 1952**
 ----------
 
 > **Howto:**
-> - install latest youtube-dl from <a href="http://rg3.github.io/youtube-dl/download.html">here</a>
-> - install express, exec, youtube-feeds and ejs from npm
-> - chmod a+x ytb-player.sh clearcache.sh app.js
-> - launch the app with nodejs
+> - chmod +x installer.sh
+> - ./installer.sh (do not launch as root)
 > - enjoy some music !
 
 
