@@ -94,11 +94,8 @@ app.get('/Nowplaying', function(req, res) {
 app.get('/clearcache', function(req, res) {
 	logfullurl(req);
 	console.log("Clearing cache...");
-	exec(['./clearcache.sh'], function(err, out, code) {
-		if(err instanceof Error)
-			throw err;
-		process.stderr.write(err);
-		process.stdout.write(out);
+	fs.readdirSync(__dirname+'/cache').forEach(function(filename) {
+		fs.unlinkSync(__dirname+'/cache/'+filename);
 	});
 	res.setHeader('Content-type', 'text/plain');
 	res.end("Cache cleared");
