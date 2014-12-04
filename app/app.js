@@ -10,6 +10,8 @@ var playing = 0; // U PLAYIN OR NOT BRUH
 var nowPlaying; // WOT R U PLAYIN M9 
 var musics = getMusics();
 var apiPath = '/PiTube/api/';
+
+app.use(express.static(__dirname+'/public'))
 app.set('view engine', 'ejs');
 
 function getMusics(){
@@ -48,7 +50,11 @@ app.get('/', function(req, res){
 		musics: musics,
 		apiPath: apiPath
 	});
-})
+});
+
+app.get(apiPath,function(req, res){
+	console.log(req.query.music);
+});
 
 app.get(apiPath+':id', function(req, res){
 	logfullurl(req);

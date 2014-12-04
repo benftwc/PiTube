@@ -4,17 +4,24 @@
 <html leng="en">
 <head>
 	<title>PiTube</title>
-	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/bootstrap.css">
 </head>
 <body>
 	<div class="container">
-		<h1>Bienvenu sur PiTube !</h1>
-		<p>Musique en cours: <%= nowPlaying %></p>
-		<h2>Fichiers en cache: </h2>
+		<h1>Welcome to PiTube !</h1>
+		<p>Now playing: <em id="nowPlaying"><%= nowPlaying %></em></p>
+		<form id="play" action="/" class="form-group">
+			<input type="text" name="music" placeholder="music" class="form-control">
+			<input type="submit" value="listen" class="form-control">
+		</form> 
+		<h2>Cached files: </h2>
 		<table class="table table-striped">
 			<% for(var i=0; i<musics.length; i++) {%>
 				<tr><td><%= i+1 %></td><td><a target="_blank" href=".<%= apiPath %><%= musics[i] %>"<%= musics[i] %>><%= musics[i] %></a></tr></td>
 			<% } %>
 		</ul>
 	</div>
+	<script type="text/javascript" src="/js/jquery.js"></script>
+	<script type="text/javascript" src="/js/musicHandler.js"></script>
 </body>
+</html>
