@@ -52,10 +52,6 @@ app.get('/', function(req, res){
 	});
 });
 
-app.get(apiPath,function(req, res){
-	console.log(req.query.music);
-});
-
 app.get(apiPath+':id', function(req, res){
 	logfullurl(req);
 	res.setHeader('Content-Type', 'text/plain');
