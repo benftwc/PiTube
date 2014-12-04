@@ -19,7 +19,7 @@ function getMusics(){
 	var musics = fs.readdirSync('./cache/');
 	for(var i=0; i<musics.length; i++){
 		musics[i] = replaceAll(".m4a", "", musics[i]);
-		musics[i] = replaceAll("_", " ", musics[i]);
+		musics[i] = replaceAll(",", " ", musics[i]);
 	}
 	return musics
 }
@@ -58,14 +58,14 @@ app.get(apiPath+':id', function(req, res){
 	res.setHeader('Content-Type', 'text/plain');
 	var id = req.params.id.split(' ');
 	var escaped = shellescape(id);
-	res.end('Playing ' + req.params.id + ' on your raspberry Pi');
-	console.log("Now playing "+ req.params.id);
+	res.end('Playing ' + escaped + ' on your raspberry Pi');
+	console.log("Now playing "+ escaped);
 	if(playing){
 		killMplayer();
 	}else{
 		playing = 1;
 	}
-	exec(['./ytb-player.sh', id], function(err, out, code) {
+	exec(['./ytb-player.sh', escaped], function(err, out, code) {
 		if(err instanceof Error)
 			throw err;
 		process.stderr.write(err);

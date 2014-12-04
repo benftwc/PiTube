@@ -1,7 +1,7 @@
 #!/bin/bash
 title=$@
 title=${title,,} #lowercase
-title=${title// /_} #replace " " with "_"
+title=${title// /,} #replace " " with "_"
 if [ -f ./cache/$title.m4a ];
 then
 	mplayer -fs ./cache/$title.m4a

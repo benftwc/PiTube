@@ -9,6 +9,8 @@
 		"express": "4.10.x",
 		"ejs": "1.0.x",
 		"youtube-feeds": "2.3.x",
-		"exec": "0.1.x"
+		"exec": "0.1.x",
+		"fs": "0.0.x",
+		"shell-escape": "0.1.x"
 	}
 }
