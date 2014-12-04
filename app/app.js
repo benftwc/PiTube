@@ -3,7 +3,8 @@ var express = require('express'),
 	port = 1337, 
 	exec = require('exec'),
 	fs = require('fs'),
-	shellescape = require('shell-escape');
+	shellescape = require('shell-escape'),
+	ip = require('ip');
 
 var app = express();
 var server = http.createServer(app);
@@ -49,7 +50,8 @@ app.get('/', function(req, res){
 	res.render('pages/index', {
 		nowPlaying: nowPlaying,
 		musics: musics,
-		apiPath: apiPath
+		apiPath: apiPath,
+		ip: ip.address()
 	});
 });
 

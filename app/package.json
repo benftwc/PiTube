@@ -11,6 +11,7 @@
 		"youtube-feeds": "2.3.x",
 		"exec": "0.1.x",
 		"fs": "0.0.x",
-		"shell-escape": "0.1.x"
+		"shell-escape": "0.1.x",
+		"ip": "0.3.x"
 	}
 }
