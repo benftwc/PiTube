@@ -2,7 +2,8 @@ var express = require('express'),
 	http = require('http'),
 	port = 1337, 
 	exec = require('exec'),
-	fs = require('fs');
+	fs = require('fs'),
+	shellescape = require('shell-escape');
 
 var app = express();
 var server = http.createServer(app);
@@ -55,6 +56,8 @@ app.get('/', function(req, res){
 app.get(apiPath+':id', function(req, res){
 	logfullurl(req);
 	res.setHeader('Content-Type', 'text/plain');
+	var id = req.params.id.split(' ');
+	var escaped = shellescape(id);
 	res.end('Playing ' + req.params.id + ' on your raspberry Pi');
 	console.log("Now playing "+ req.params.id);
 	if(playing){
@@ -62,7 +65,7 @@ app.get(apiPath+':id', function(req, res){
 	}else{
 		playing = 1;
 	}
-	exec(['./ytb-player.sh', req.params.id], function(err, out, code) {
+	exec(['./ytb-player.sh', id], function(err, out, code) {
 		if(err instanceof Error)
 			throw err;
 		process.stderr.write(err);
