@@ -4,7 +4,10 @@ var express = require('express'),
 	exec = require('exec'),
 	fs = require('fs'),
 	shellescape = require('shell-escape'),
-	ip = require('ip');
+	ip = require('ip'),
+	youtube = require('youtube-feeds'),
+	youtubedl = require('youtube-dl'),
+	player = require('player');
 
 var app = express();
 var server = http.createServer(app);
@@ -12,14 +15,17 @@ var playing = 0; // U PLAYIN OR NOT BRUH
 var nowPlaying; // WOT R U PLAYIN M9 
 var musics = getMusics();
 var apiPath = '/PiTube/api/';
+var video;
 
+player = new Player();
+youtube.httpProtocol = 'https';
 app.use(express.static(__dirname+'/public'))
 app.set('view engine', 'ejs');
 
 function getMusics(){
 	var musics = fs.readdirSync('./cache/');
 	for(var i=0; i<musics.length; i++){
-		musics[i] = replaceAll(".m4a", "", musics[i]);
+		musics[i] = replaceAll(".mp4", "", musics[i]);
 		musics[i] = replaceAll(",", " ", musics[i]);
 	}
 	return musics
@@ -57,6 +63,32 @@ app.get('/', function(req, res){
 
 app.get(apiPath+':id', function(req, res){
 	logfullurl(req);
+	youtube.feeds.videos({q:req.params.id, 'max-results': 1}, function(err, data) {
+		if( err instanceof Error){
+			console.log(err);
+		} else{
+			video = youtubedl('https://www.youtube.com/watch?v='+data.items[0].id,
+				['--max-quality=18'],
+				{cwd: __dirname});
+			video.on('info', function(info){
+				console.log('Download started');
+			});
+			nowPlaying = data.items[0].title;
+			console.log(data.items[0].title);
+			nowPlaying = nowPlaying.toLowerCase();
+			var f = fs.createWriteStream(__dirname+'/cache/'+nowPlaying+'.mp4');
+			f.on('finish', function(){
+				player.add(__dirname+'/cache/'+nowPlaying+'.mp4')
+				player.on('playEnd', function(){
+					nowPlaying = 'nothing';
+				});
+			});
+			video.pipe(f);
+		}
+		res.setHeader('Content-type', 'text/plain');
+		res.end('Playing ' + nowPlaying + ' on your raspberry Pi');
+	});/** BASH VERSION
+	logfullurl(req);
 	res.setHeader('Content-Type', 'text/plain');
 	var id = req.params.id.split(' ');
 	var escaped = shellescape(id);
@@ -72,7 +104,7 @@ app.get(apiPath+':id', function(req, res){
 			throw err;
 		process.stderr.write(err);
 		process.stdout.write(out);
-	});
+	});**/
 	nowPlaying = req.params.id;
 });
 
