@@ -22,6 +22,7 @@
 		</ul>
 	</div>
 	<script type="text/javascript" src="/js/jquery.js"></script>
+	<script type="text/javascript" src="/js/socket.io.js"></script>
 	<script type="text/javascript">
 		$("#play").submit(function(event) {
 			event.preventDefault();
@@ -32,9 +33,9 @@
 		$('.musicLinks').click(function(event) {
 			event.preventDefault();
 			var url = $(this).attr('href');
-			$.get(url);
+			$.get(url);text/javascript
 			$("#nowPlaying").text($(this).attr('name'));
-		})
+		});
 		</script>
 </body>
 </html>

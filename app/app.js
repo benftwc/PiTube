@@ -3,11 +3,10 @@ var express = require('express'),
 	port = 1337, 
 	exec = require('exec'),
 	fs = require('fs'),
-	shellescape = require('shell-escape'),
 	ip = require('ip'),
 	youtube = require('youtube-feeds'),
 	youtubedl = require('youtube-dl'),
-	player = require('player');
+	Mplayer = require('node-mplayer');
 
 var app = express();
 var server = http.createServer(app);
@@ -16,8 +15,8 @@ var nowPlaying; // WOT R U PLAYIN M9
 var musics = getMusics();
 var apiPath = '/PiTube/api/';
 var video;
+var player = new Mplayer();
 
-player = new Player();
 youtube.httpProtocol = 'https';
 app.use(express.static(__dirname+'/public'))
 app.set('view engine', 'ejs');
@@ -67,44 +66,35 @@ app.get(apiPath+':id', function(req, res){
 		if( err instanceof Error){
 			console.log(err);
 		} else{
-			video = youtubedl('https://www.youtube.com/watch?v='+data.items[0].id,
-				['--max-quality=18'],
-				{cwd: __dirname});
-			video.on('info', function(info){
-				console.log('Download started');
-			});
 			nowPlaying = data.items[0].title;
 			console.log(data.items[0].title);
 			nowPlaying = nowPlaying.toLowerCase();
-			var f = fs.createWriteStream(__dirname+'/cache/'+nowPlaying+'.mp4');
-			f.on('finish', function(){
-				player.add(__dirname+'/cache/'+nowPlaying+'.mp4')
-				player.on('playEnd', function(){
-					nowPlaying = 'nothing';
-				});
+			fs.exists(__dirname+'/cache/'+nowPlaying+'.mp4', function(exists){
+				if(exists){
+					console.log('Playing ' + nowPlaying);
+					player.stop();
+					player.setFile(__dirname+'/cache/'+nowPlaying+'.mp4');
+					player.play();
+				}else{
+					video = youtubedl('https://www.youtube.com/watch?v='+data.items[0].id,
+						['--max-quality=18'],
+						{cwd: __dirname});
+					video.on('info', function(info){
+						console.log('Download started');
+					});
+					var f = fs.createWriteStream(__dirname+'/cache/'+nowPlaying+'.mp4');
+					f.on('finish', function(){
+						player.stop();
+						player.setFile(__dirname+'/cache/'+nowPlaying+'.mp4');
+						player.play();
+					});
+					video.pipe(f);
+				}
 			});
-			video.pipe(f);
 		}
 		res.setHeader('Content-type', 'text/plain');
 		res.end('Playing ' + nowPlaying + ' on your raspberry Pi');
-	});/** BASH VERSION
-	logfullurl(req);
-	res.setHeader('Content-Type', 'text/plain');
-	var id = req.params.id.split(' ');
-	var escaped = shellescape(id);
-	res.end('Playing ' + escaped + ' on your raspberry Pi');
-	console.log("Now playing "+ escaped);
-	if(playing){
-		killMplayer();
-	}else{
-		playing = 1;
-	}
-	exec(['./ytb-player.sh', escaped], function(err, out, code) {
-		if(err instanceof Error)
-			throw err;
-		process.stderr.write(err);
-		process.stdout.write(out);
-	});**/
+	});
 	nowPlaying = req.params.id;
 });
 
