@@ -7,8 +7,7 @@ Casting youtube musics to your **Raspberry pi since 1952**
 ----------
 
 > **Howto:**
-> - chmod +x installer.sh
-> - ./installer.sh (do not launch as root)
+> - cd ./app && npm install
 > - enjoy some music !
 
 
