@@ -15,9 +15,9 @@
 			<input type="submit" value="listen" class="form-control">
 		</form> 
 		<h2>Cached files: </h2>
-		<table class="table table-striped">
+		<table class="table table-striped" id="cachedFiles">
 			<% for(var i=0; i<musics.length; i++) {%>
-				<tr><td><%= i+1 %></td><td><a class="musicLinks" name="<%= musics[i] %>" href=".<%= apiPath %><%= musics[i] %>"<%= musics[i] %>><%= musics[i] %></a></tr></td>
+				<tr><td><a class="musicLinks" name="<%= musics[i] %>" href=".<%= apiPath %><%= musics[i] %>"><%= musics[i] %></a></tr></td>
 			<% } %>
 		</ul>
 	</div>
@@ -33,9 +33,23 @@
 		$('.musicLinks').click(function(event) {
 			event.preventDefault();
 			var url = $(this).attr('href');
-			$.get(url);text/javascript
+			$.get(url);
 			$("#nowPlaying").text($(this).attr('name'));
 		});
-		</script>
+
+		var socket = io.connect('<%= ip %>:1337');
+		socket.on('message', function(message){
+			alert(message);
+		});
+
+		socket.on('nowPlaying', function(message){
+			console.log(message);
+			$("#nowPlaying").text(message);
+		});
+
+		socket.on('newFile', function(message){
+			$('#cachedFiles').append('<tr><td><a class="muiscLinks" name="'+message+'"href=".<%= apiPath %>'+message+'">'+message+'</a></tr></td>');
+		});
+	</script>
 </body>
 </html>

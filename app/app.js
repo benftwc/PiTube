@@ -10,6 +10,7 @@ var express = require('express'),
 
 var app = express();
 var server = http.createServer(app);
+var io = require('socket.io').listen(server);
 var nowPlaying; // WOT R U PLAYIN M8
 var musics = getMusics();
 var apiPath = '/PiTube/api/';
@@ -38,6 +39,9 @@ function logfullurl(req){
 	console.log("GET "+fullUrl);
 }
 
+io.sockets.on('connection', function(socket){
+    console.log('New client connected');
+});
 /**
 Web app
 **/
@@ -81,7 +85,7 @@ app.get(apiPath+':id', function(req, res){
 	logfullurl(req);
 	fs.exists(cachePath+req.params.id+'.mp4', function(exists){
 		if(exists){
-			nowPlaying = req.params.id.toLowerCase();
+			nowPlaying = req.params.id;
 			player.stop();
 			player.setFile(cachePath+nowPlaying+'.mp4');
 			player.play();
@@ -99,6 +103,7 @@ app.get(apiPath+':id', function(req, res){
 						player.stop();
 						player.setFile(cachePath+nowPlaying+'.mp4');
 						player.play();
+						io.sockets.emit('nowPlaying', nowPlaying);
 					}else{
 						video = youtubedl('https://www.youtube.com/watch?v='+data.items[0].id,
 							['--max-quality=18'],
@@ -111,6 +116,8 @@ app.get(apiPath+':id', function(req, res){
 							player.stop();
 							player.setFile(cachePath+nowPlaying+'.mp4');
 							player.play();
+							io.sockets.emit('nowPlaying', nowPlaying);
+							io.sockets.emit('newFile', nowPlaying);
 						});
 						video.pipe(f);
 					}
@@ -147,5 +154,5 @@ app.get('/clearcache', function(req, res) {
 	res.end("Cache cleared");
 });
 
-app.listen(port);
+server.listen(port);
 console.log("App running on port " + port);
