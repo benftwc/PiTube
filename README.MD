@@ -16,3 +16,6 @@ Casting youtube musics to your **Raspberry pi since 1952**
 > - **http://0.0.0.0:1337/Killall** to kill all mplayer running processes
 > - **http://0.0.0.0:1337/clearcache** to clear PiTube's cache
 > - **http://0.0.0.0:1337/** web interface
+> - **http://0.0.0.0:1337/PiTube/play** to pause/resume the player
+> - **http://0.0.0.0:1337/PiTube/stop** to stop the player
+> - **http://0.0.0.0:1337/PiTube/mute** to mute the player
