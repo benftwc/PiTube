@@ -9,7 +9,7 @@
 <body>
 	<div class="container">
 		<h1>PiTube's web Interface</h1>
-		<p>Now playing: <em id="nowPlaying"><%= nowPlaying %></em></p>
+		<p>Now playing: <em id="nowPlaying"><%= nowPlaying %></em>&nbsp<img id="loading" src="/pics/loading.gif" style="visibility:hidden;"/></p>
 		<form id="play" action="/" class="form-group">
 			<input type="text" name="music" placeholder="music" class="form-control">
 			<input type="submit" value="listen" class="form-control">
@@ -25,9 +25,10 @@
 	<script type="text/javascript" src="/js/jquery.js"></script>
 	<script type="text/javascript" src="/js/socket.io.js"></script>
 	<script type="text/javascript">
+
 		$("#play").submit(function(event) {
 			event.preventDefault();
-			$.get('http://<%= ip %>:1337/PiTube/api/' + $("#play").find('input[name="music"]').val());
+			$.get('http://<%= ip %>:<%= port %>/PiTube/api/' + $("#play").find('input[name="music"]').val());
 			$("#nowPlaying").text($("#play").find('input[name="music"]').val());
 		});
 
@@ -38,18 +39,25 @@
 			$("#nowPlaying").text($(this).attr('name'));
 		});
 
-		var socket = io.connect('<%= ip %>:1337');
+		var socket = io.connect('<%= ip %>:<%= port %>');
 		socket.on('message', function(message){
 			alert(message);
+		});
+
+		socket.on('downloading', function(message){
+			$("#nowPlaying").text(message);
+			console.log("blabla");
+			$("#loading").css("visibility", "visible");
 		});
 
 		socket.on('nowPlaying', function(message){
 			console.log(message);
 			$("#nowPlaying").text(message);
+			$('#loading').css('display', 'none');
 		});
 
 		socket.on('newFile', function(message){
-			$('#cachedFiles').append('<tr><td><a class="muiscLinks" name="'+message+'"href=".<%= apiPath %>'+message+'">'+message+'</a></tr></td>');
+			var newMusic = $('<tr><td><a class="muiscLinks" name="'+message+'"href=".<%= apiPath %>'+message+'">'+message+'</a></tr></td>').hide().appendTo('#cachedFiles').show('slow');
 		});
 	</script>
 </body>

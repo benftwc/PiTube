@@ -8,6 +8,7 @@ Casting youtube musics to your **Raspberry pi since 1952**
 
 > **Howto:**
 > - cd ./app && npm install
+> - create a folder called cach in the app folder (/app) 
 > - enjoy some music !
 
 

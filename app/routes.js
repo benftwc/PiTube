@@ -3,14 +3,15 @@ function logfullurl(req){
 	console.log("GET "+fullUrl);
 }
 
-exports.webApp = function(nowPlaying, musics, apiPath, ip){
+exports.webApp = function(nowPlaying, musics, apiPath, ip, port){
 	return function(req, res){
 		logfullurl(req);
 		res.render('pages/index', {
 			nowPlaying: nowPlaying,
 			musics: musics,
 			apiPath: apiPath,
-			ip: ip
+			ip: ip,
+			port: port
 		});
 	}
 }

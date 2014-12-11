@@ -1,6 +1,6 @@
 var express = require('express'),
 	http = require('http'),
-	port = 1337, 
+	port = 1337,
 	exec = require('exec'),
 	fs = require('fs'),
 	ip = require('ip'),
@@ -26,9 +26,10 @@ app.set('view engine', 'ejs');
 
 
 function getMusics(){
-	var musics = fs.readdirSync('./cache/');
+	musics = [];
+	musics = fs.readdirSync('./cache/');
 	for(var i=0; i<musics.length; i++){
-		musics[i] = replaceAll(".mp4", "", musics[i]);
+		musics[i] = replaceAll(".mp3", "", musics[i]);
 	}
 	return musics;
 }
@@ -44,14 +45,15 @@ function logfullurl(req){
 
 io.sockets.on('connection', function(socket){
     console.log('New client connected');
+    socket.emit('nowPlaying', nowPlaying);
 });
 
 /**
 Web app routes
 **/
 
-app.get('/', routes.webApp(nowPlaying, musics, apiPath, ip.address()));
-app.get('/PiTube', routes.webApp(nowPlaying, musics, apiPath, ip.address()));
+app.get('/', routes.webApp(nowPlaying, getMusics(), apiPath, ip.address(), port));
+app.get('/PiTube', routes.webApp(nowPlaying, getMusics(), apiPath, ip.address(), port));
 
 /**
 Controls
@@ -65,12 +67,13 @@ app.get('/PiTube/mute', routes.mute(player, muted));
 
 app.get(apiPath+':id', function(req, res){
 	logfullurl(req);
-	fs.exists(cachePath+req.params.id+'.mp4', function(exists){
+	fs.exists(cachePath+req.params.id+'.mp3', function(exists){
 		if(exists){
 			nowPlaying = req.params.id;
 			player.stop();
-			player.setFile(cachePath+nowPlaying+'.mp4');
+			player.setFile(cachePath+nowPlaying+'.mp3');
 			player.play();
+			console.log(nowPlaying+"already exists, now playing it");
 			io.sockets.emit('nowPlaying', nowPlaying);
 		}else{
 			youtube.feeds.videos({q:req.params.id, 'max-results': 1}, function(err, data) {
@@ -80,32 +83,39 @@ app.get(apiPath+':id', function(req, res){
 					nowPlaying = data.items[0].title;
 					console.log(data.items[0].title);
 					nowPlaying = nowPlaying.toLowerCase();
-					fs.exists(cachePath+nowPlaying+'.mp4', function(exists){
+					fs.exists(cachePath+nowPlaying+'.mp3', function(exists){
 						if(exists){
 							console.log('Playing ' + nowPlaying);
 							player.stop();
-							player.setFile(cachePath+nowPlaying+'.mp4');
+							player.setFile(cachePath+nowPlaying+'.mp3');
 							player.play();
+							console.log(nowPlaying+"already exists, now playing it");
 							io.sockets.emit('nowPlaying', nowPlaying);
 						}else{
 							video = youtubedl('https://www.youtube.com/watch?v='+data.items[0].id,
-								['--max-quality=18'],
+								['--max-quality=18', '--youtube-skip-dash-manifest', '-x', '--audio-format=mp3'],
 								{cwd: __dirname});
 							video.on('info', function(info){
-								console.log('Download started');
+								console.log('Music not cached yet, downloading ....');
+								io.sockets.emit('downloading', nowPlaying);
 							});
-							var f = fs.createWriteStream(cachePath+nowPlaying+'.mp4');
+							var f = fs.createWriteStream(cachePath+nowPlaying+'.mp3');
 							f.on('finish', function(){
 								player.stop();
-								player.setFile(cachePath+nowPlaying+'.mp4');
+								player.setFile(cachePath+nowPlaying+'.mp3');
 								player.play();
+								console.log('Download completed');
+								console.log('File name: '+nowPlaying+".mp3");
+								console.log('Now playing: '+nowPlaying);
 								io.sockets.emit('nowPlaying', nowPlaying);
 								io.sockets.emit('newFile', nowPlaying);
 							});
-							f.on("error", function(error){
+							f.on('error', function(error){
 								console.log(error);
 							});
-							video.pipe(f);
+							video.pipe(f).on('error', function(error){
+								console.log(error);
+							});
 						}
 					});
 				}
@@ -131,11 +141,13 @@ app.get('/NowPlaying', function(req, res){
 app.get('/clearcache', function(req, res) {
 	logfullurl(req);
 	console.log("Clearing cache...");
-	fs.readdirSync(__dirname+'/cache').forEach(function(filename) {
+	fs.readdirSync(__dirname+'/cache/').forEach(function(filename) {
 		fs.unlinkSync(cachePath+filename);
 	});
 	res.setHeader('Content-type', 'text/plain');
 	res.end("Cache cleared");
+	musics = getMusics();
+	console.log(musics);
 });
 
 server.listen(port);
