@@ -15,6 +15,7 @@
 		"shell-escape": "0.1.x",
 		"ip": "0.3.x",
 		"node-mplayer": "0.0.x",
-		"socket.io": "1.2.x"
+		"socket.io": "1.2.x",
+		"serve-favicon": "2.1.x"
 	}
 }
