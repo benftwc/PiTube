@@ -31,7 +31,6 @@
 			$.get('http://<%= ip %>:<%= port %>/PiTube/api/' + $("#play").find('input[name="music"]').val());
 			$("#nowPlaying").text($("#play").find('input[name="music"]').val());
 		});
-
 		$('.musicLinks').click(function(event) {
 			event.preventDefault();
 			var url = $(this).attr('href');
@@ -40,13 +39,9 @@
 		});
 
 		var socket = io.connect('<%= ip %>:<%= port %>');
-		socket.on('message', function(message){
-			alert(message);
-		});
 
 		socket.on('downloading', function(message){
 			$("#nowPlaying").text(message);
-			console.log("blabla");
 			$("#loading").css("visibility", "visible");
 		});
 
@@ -55,7 +50,7 @@
 			$("#nowPlaying").text(message);
 			$('#loading').css('display', 'none');
 		});
-
+		
 		socket.on('newFile', function(message){
 			var newMusic = $('<tr><td><a class="muiscLinks" name="'+message+'"href=".<%= apiPath %>'+message+'">'+message+'</a></tr></td>').hide().appendTo('#cachedFiles').show('slow');
 		});

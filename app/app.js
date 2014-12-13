@@ -19,6 +19,8 @@ var cachePath = __dirname+'/cache/';
 var player = new Mplayer();
 var paused = 0; // IS DA PLAYER PAUSED
 var muted = 0; // IS DA PLAYER MUTED
+var playing = 0;
+var fileFormat = '.mp3';
 
 youtube.httpProtocol = 'https';
 app.use(express.static(__dirname+'/public'));
@@ -29,7 +31,7 @@ function getMusics(){
 	musics = [];
 	musics = fs.readdirSync('./cache/');
 	for(var i=0; i<musics.length; i++){
-		musics[i] = replaceAll(".mp3", "", musics[i]);
+		musics[i] = replaceAll(fileFormat, "", musics[i]);
 	}
 	return musics;
 }
@@ -65,15 +67,22 @@ app.get('/PiTube/stop', routes.stop(player));
 
 app.get('/PiTube/mute', routes.mute(player, muted));
 
+app.get('apiPath'+':id/next', function(req, res){
+	player.on('end', function(error){
+		if(error instanceof Error) console.log(error);
+	});
+});
+
 app.get(apiPath+':id', function(req, res){
 	logfullurl(req);
-	fs.exists(cachePath+req.params.id+'.mp3', function(exists){
+	fs.exists(cachePath+req.params.id+fileFormat, function(exists){
 		if(exists){
 			nowPlaying = req.params.id;
-			player.stop();
-			player.setFile(cachePath+nowPlaying+'.mp3');
+			player.setFile(cachePath+nowPlaying+fileFormat);
+			if(playing) player.stop();
 			player.play();
-			console.log(nowPlaying+"already exists, now playing it");
+			playing = 1;
+			console.log(nowPlaying+" file cached alredy no need to download it");
 			io.sockets.emit('nowPlaying', nowPlaying);
 		}else{
 			youtube.feeds.videos({q:req.params.id, 'max-results': 1}, function(err, data) {
@@ -83,13 +92,14 @@ app.get(apiPath+':id', function(req, res){
 					nowPlaying = data.items[0].title;
 					console.log(data.items[0].title);
 					nowPlaying = nowPlaying.toLowerCase();
-					fs.exists(cachePath+nowPlaying+'.mp3', function(exists){
+					fs.exists(cachePath+nowPlaying+fileFormat, function(exists){
 						if(exists){
 							console.log('Playing ' + nowPlaying);
-							player.stop();
-							player.setFile(cachePath+nowPlaying+'.mp3');
+							player.setFile(cachePath+nowPlaying+fileFormat);
+							if(playing) player.stop();
 							player.play();
-							console.log(nowPlaying+"already exists, now playing it");
+							playing = 1;
+							console.log(nowPlaying+" file cached alredy no need to download it");
 							io.sockets.emit('nowPlaying', nowPlaying);
 						}else{
 							video = youtubedl('https://www.youtube.com/watch?v='+data.items[0].id,
@@ -99,13 +109,14 @@ app.get(apiPath+':id', function(req, res){
 								console.log('Music not cached yet, downloading ....');
 								io.sockets.emit('downloading', nowPlaying);
 							});
-							var f = fs.createWriteStream(cachePath+nowPlaying+'.mp3');
+							var f = fs.createWriteStream(cachePath+nowPlaying+fileFormat);
 							f.on('finish', function(){
-								player.stop();
-								player.setFile(cachePath+nowPlaying+'.mp3');
+								player.setFile(cachePath+nowPlaying+fileFormat);
+								if(playing) player.stop();
 								player.play();
+								playing = 1;
 								console.log('Download completed');
-								console.log('File name: '+nowPlaying+".mp3");
+								console.log('File name: '+nowPlaying+fileFormat);
 								console.log('Now playing: '+nowPlaying);
 								io.sockets.emit('nowPlaying', nowPlaying);
 								io.sockets.emit('newFile', nowPlaying);
@@ -130,7 +141,7 @@ app.get(apiPath+':id', function(req, res){
 Stuffs
 **/
 app.get('/NowPlaying', function(req, res){
-	res.set('content-type', 'plain/text');
+	res.set('content-type', 'text/plain');
 		if(nowPlaying.length > 0){
 			res.end(nowPlaying);
 		}else{
@@ -148,6 +159,10 @@ app.get('/clearcache', function(req, res) {
 	res.end("Cache cleared");
 	musics = getMusics();
 	console.log(musics);
+});
+
+player.on('end', function(){
+	playing = 0;
 });
 
 server.listen(port);
