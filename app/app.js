@@ -7,7 +7,8 @@ var express = require('express'),
 	youtube = require('youtube-feeds'),
 	youtubedl = require('youtube-dl'),
 	Mplayer = require('node-mplayer'),
-	routes = require('./routes.js');
+	routes = require('./routes.js'),
+	favicon = require('serve-favicon');
 
 var app = express();
 var server = http.createServer(app);
@@ -24,6 +25,7 @@ var fileFormat = '.mp3';
 
 youtube.httpProtocol = 'https';
 app.use(express.static(__dirname+'/public'));
+app.use(favicon(__dirname+'/public/pics/favicon.ico'));
 app.set('view engine', 'ejs');
 
 
