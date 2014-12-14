@@ -57,21 +57,30 @@ Web app routes
 **/
 
 app.get('/', routes.webApp(nowPlaying, getMusics(), apiPath, ip.address(), port));
-app.get('/PiTube', routes.webApp(nowPlaying, getMusics(), apiPath, ip.address(), port));
+app.get('/PiTube', function(req, res){
+	res.redirect('/');
+});
 
 /**
 Controls
 **/
 
-app.get('/PiTube/pause', routes.pause(player, paused));
+app.get('/PiTube/pause', routes.pause(player, paused, playing));
+app.get('/PiTube/stop', routes.stop(player, playing));
+app.get('/PiTube/mute', routes.mute(player, muted, playing));
 
-app.get('/PiTube/stop', routes.stop(player));
-
-app.get('/PiTube/mute', routes.mute(player, muted));
-
-app.get('apiPath'+':id/next', function(req, res){
-	player.on('end', function(error){
-		if(error instanceof Error) console.log(error);
+app.get('/PiTube/delete/:name', function(req, res){
+	logfullurl(req);
+	res.set('Content-type', 'text/plain');
+	var file = cachePath+req.params.name+fileFormat;
+	fs.exists(file, function(exists){
+		if(exists){
+			fs.unlinkSync(file);
+			res.end('File removed with success');
+		}else{
+			console.log(file);
+			res.end('Err: file doesnt exist');
+		}
 	});
 });
 
@@ -165,6 +174,7 @@ app.get('/clearcache', function(req, res) {
 
 player.on('end', function(){
 	playing = 0;
+	console.log('end');
 });
 
 server.listen(port);

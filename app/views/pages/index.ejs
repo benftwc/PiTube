@@ -7,17 +7,21 @@
 	<link rel="stylesheet" href="/css/bootstrap.css">
 </head>
 <body>
+
 	<div class="container">
 		<h1>PiTube's web Interface</h1>
 		<p>Now playing: <em id="nowPlaying"><%= nowPlaying %></em>&nbsp<img id="loading" src="/pics/loading.gif" style="visibility:hidden;"/></p>
 		<form id="play" action="/" class="form-group">
 			<input type="text" name="music" placeholder="music" class="form-control">
 			<input type="submit" value="listen" class="form-control">
-		</form> 
+		</form>
+		<a class="control" href="/PiTube/Pause"><img src="/pics/pause.png" width="39px" height="39px"/></a>
+		<a class="control" href="/PiTube/Stop"><img src="/pics/stop.png" width="24px" height="24px"/></a>
+		<a class="control" href="/PiTube/Mute"><img src="/pics/mute.png" width="24px" height="24px"/></a>
 		<h2>Cached files: </h2>
 		<table class="table table-striped" id="cachedFiles">
 			<% for(var i=0; i<musics.length; i++) {%>
-				<tr><td><a class="musicLinks" name="<%= musics[i] %>" href=".<%= apiPath %><%= musics[i] %>"><%= musics[i] %></a></tr></td>
+				<tr><td><a class="musicLinks" name="<%= musics[i] %>" href=".<%= apiPath %><%= musics[i] %>"><%= musics[i] %></a></td><td><a class="delete" href="/PiTube/delete/<%= musics[i] %>"><img src="/pics/cross.png"/></a></tr>
 			<% } %>
 		</table>
 	</div>
@@ -31,11 +35,27 @@
 			$.get('http://<%= ip %>:<%= port %>/PiTube/api/' + $("#play").find('input[name="music"]').val());
 			$("#nowPlaying").text($("#play").find('input[name="music"]').val());
 		});
+
+		$(".delete").click(function(event){
+			event.preventDefault();
+			var url = $(this).attr('href');
+			$.get(url);
+			$(this).parent().hide('slow', function(){
+				$(this).parent().remove();
+			})
+		});
+
 		$('.musicLinks').click(function(event) {
 			event.preventDefault();
 			var url = $(this).attr('href');
 			$.get(url);
 			$("#nowPlaying").text($(this).attr('name'));
+		});
+
+		$('.control').click(function(event) {
+			event.preventDefault();
+			var url = $(this).attr('href');
+			$.get(url);
 		});
 
 		var socket = io.connect('<%= ip %>:<%= port %>');
@@ -50,7 +70,7 @@
 			$("#nowPlaying").text(message);
 			$('#loading').css('display', 'none');
 		});
-		
+
 		socket.on('newFile', function(message){
 			var newMusic = $('<tr><td><a class="muiscLinks" name="'+message+'"href=".<%= apiPath %>'+message+'">'+message+'</a></tr></td>').hide().appendTo('#cachedFiles').show('slow');
 		});

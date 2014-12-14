@@ -16,10 +16,10 @@ exports.webApp = function(nowPlaying, musics, apiPath, ip, port){
 	}
 }
 
-exports.pause = function(player, paused){
+exports.pause = function(player, paused, playing){
 	return function(req, res){
 		logfullurl(req);
-		res.set('content-type', 'plain/text');
+		res.set('content-type', 'text/plain');
 		if(paused){
 			player.pause();
 			res.end('Player unpaused\n');
@@ -32,19 +32,19 @@ exports.pause = function(player, paused){
 	}
 }
 
-exports.stop = function(player){
+exports.stop = function(player, playing){
 	return function(req, res){
 		logfullurl(req);
-		res.set('content-type', 'plain/text');
+		res.set('content-type', 'text/plain');
 		res.end('Player stopped\n');
 		player.stop();
 	}
 }
 
-exports.mute = function(player, muted){
+exports.mute = function(player, muted, playing){
 	return function(req, res){
 		logfullurl(req);
-		res.set('content-type', 'plain/text');
+		res.set('content-type', 'text/plain'); 
 		if(muted){
 			player.mute();
 			res.end('Player unmuted\n');

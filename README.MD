@@ -20,3 +20,4 @@ Casting youtube musics to your **Raspberry pi since 1952**
 > - **http://0.0.0.0:1337/PiTube/play** to pause/resume the player
 > - **http://0.0.0.0:1337/PiTube/stop** to stop the player
 > - **http://0.0.0.0:1337/PiTube/mute** to mute the player
+> - **http://0.0.0.0:1337/PiTube/delete/:name** delete a song from the cache
